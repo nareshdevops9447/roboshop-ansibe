@@ -1,0 +1,29 @@
+- name: MongoDB Schema
+  when: schema_type == "mongo"
+  block:
+    - name: Setup MongoDB repo file
+      ansible.builtin.copy:
+        src: mongodb.repo
+        dest: /etc/yum.repos.d/mongodb.repo
+
+    - name: Install MongoDB Client
+      ansible.builtin.yum:
+        name: mongodb-org-shell
+        state: installed
+
+    - name: Download MongoDB Pem file
+      ansible.builtin.get_url:
+        url: https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+        dest: /app/rds-combined-ca-bundle.pem
+
+    - name: Load Schema
+      ansible.builtin.shell: mongo --host mongodb-dev.nareshlab.live </app/schema/{{component}}.js
+- name: MySQL Schema
+  when: schema_type == "mysql"
+  block:
+    - name: Install MySQL Client
+      ansible.builtin.yum:
+        name: mysql
+        state: installed
+    - name: Load Schema
+        ansible.builtin.shell: mysql -h mysql-dev.nareshlab.live -uroot -pRoboShop@1 <</app/schema/{{component}}.sql

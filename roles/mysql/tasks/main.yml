@@ -1,0 +1,22 @@
+- name: setup mongodb yum repo file
+  ansible.builtin.copy:
+    src: mysql.repo
+    dest: /etc/yum.repos.d/mysql.repo
+
+- name: Disable MySQL 8
+  ansible.builtin.shell: dnf module disable mysql -y
+
+- name: Installing mysql 5.7
+  ansible.builtin.yum:
+    name: mysql-community-server
+    state: installed
+
+- name: start service
+  ansible.buitin.systemd:
+    name: mysqld
+    state: started
+    enabled: yes
+
+- name: Set Root Password
+  ansible.builtin.shell: mysql_secure_installation --set-root-pass RoboShop@1
+  ignore_errors: yes
